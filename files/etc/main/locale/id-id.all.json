@@ -1,0 +1,46 @@
+[
+    {
+        "id": "ErrorAccessForbidden",
+        "translation": "Maaf permohonan anda tidak dapat diproses, anda tidak memiliki akses untuk aksi ini."
+    },
+    {
+        "id": "ErrorAccessDisabled",
+        "translation": "Maaf permohonan anda tidak dapat diproses, akses dimatikan."
+    },
+    {
+        "id": "ErrorBadRequest",
+        "translation": "Proses gagal, silahkan periksa kembali input datanya."
+    },
+    {
+        "id": "ErrorDBMaintenance",
+        "translation": "Sistem sedang dalam perbaikan, silahkan coba beberapa saat lagi."
+    },
+    {
+        "id": "ErrorEmptyToken",
+        "translation": "Permintaan tidak mengirimkan data kredensial, silahkan coba beberapa saat lagi atau hubungi pihak terkait."
+    },
+    {
+        "id": "ErrorInternalServer",
+        "translation": "Maaf permohonan anda tidak dapat diproses, silahkan coba beberapa saat lagi."
+    },
+    {
+        "id": "ErrorInvalidToken",
+        "translation": "Token yang digunakan tidak valid, silahkan coba lagi."
+    },
+    {
+        "id": "ErrorNotFoundData",
+        "translation": "Data tidak ditemukan, periksa kembali tujuan datanya."
+    },
+    {
+        "id": "ErrorUnauthorized",
+        "translation": "Sesi anda sudah habis, silahkan login kembali."
+    },
+    {
+        "id": "ErrorWrongCredentials",
+        "translation": "Email address atau password anda salah, silahkan cek input datanya kembali kembali."
+    },
+    {
+        "id": "ErrorInvalidFileType",
+        "translation": "Input file mem"
+    }
+]
