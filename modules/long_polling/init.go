@@ -56,8 +56,10 @@ func (m *LongPollingModules) RegisterCron() {
 		}
 	}
 
+	method := constants.LongPollingMethod
 	enableGoroutine, _ := strconv.ParseBool(os.Getenv(constants.EnableLongPollingGoroutine))
 	if !enableGoroutine {
+		method = fmt.Sprintf("%s-no-goroutine", constants.LongPollingMethod)
 		utils.AsyncToSync()
 	}
 
@@ -156,7 +158,7 @@ func (m *LongPollingModules) RegisterCron() {
 				dateTime := time.Unix(value.Message.Date, 0)
 
 				if err := m.Platform.DB.ChatbotHistory.InsertChatbotHistory(ctx, process.ChatbotHistoryProcess{
-					Method:                   constants.LongPollingMethod,
+					Method:                   method,
 					Identifier:               value.Message.From.FirstName,
 					Datetime:                 dateTime,
 					ProcessTime:              time.Since(dateTime).Seconds(),
