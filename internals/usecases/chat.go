@@ -43,15 +43,13 @@ func (usecase *UsecaseModules) WebhookDialogflowUsecase(ctx context.Context, pay
 	} else {
 		nondialogflowNow := time.Now()
 		chatKey := constants.NotFoundKey
-		if userSessionID == "" {
-			if utils.InArray(payload.Message.Text, constants.IntroductionChat[constants.HiIntroductionKey], true) {
-				cache.SetUserRequest(payload.Message.From.ID)
-				chatKey = constants.HiIntroductionKey
-			}
-		} else {
-			cache.SetUserRequest(payload.Message.From.ID)
-			for key, value := range constants.MenusChat {
-				if utils.InArray(payload.Message.Text, value, false) {
+		if utils.InArray(payload.Message.Text, constants.IntroductionChat[constants.HiIntroductionKey], true) {
+			chatKey = constants.HiIntroductionKey
+		}
+
+		if userSessionID != "" {
+			for key, v := range constants.MenusChat {
+				if utils.InArray(payload.Message.Text, v, false) {
 					chatKey = key
 					break
 				}

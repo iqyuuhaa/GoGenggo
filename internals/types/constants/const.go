@@ -27,7 +27,10 @@ const (
 	GolangChatbotSecretKey       = "GOLANG_CHATBOT_SECRET_KEY"
 	GoogleApplicationCredentials = "GOOGLE_APPLICATION_CREDENTIALS"
 
-	APIConfigPath = "API_CONFIG_PATH"
+	APIConfigPath              = "API_CONFIG_PATH"
+	LongPollingLastUpdateID    = "LONG_POLLING_LAST_UPDATE_ID"
+	EnableLongPollingGoroutine = "ENABLE_LONG_POLLING_GOROUTINE"
+	Timezone                   = "TZ"
 )
 
 // Database

@@ -37,7 +37,7 @@ func Init(pkg *pkg.PkgWrapper, platform *platforms.PlatformModule) error {
 
 func (m *LongPollingModules) RegisterCron() {
 	ctx := context.Background()
-	updateID, _ := strconv.ParseInt(os.Getenv("LONG_POLLING_LAST_UPDATE_ID"), 10, 64)
+	updateID, _ := strconv.ParseInt(os.Getenv(constants.LongPollingLastUpdateID), 10, 64)
 	if updateID == 0 {
 		bodyResponse, err := m.Pkg.Telegram.GetUpdates(ctx, 0, 100, 0, []string{})
 		if err != nil {
@@ -56,7 +56,12 @@ func (m *LongPollingModules) RegisterCron() {
 		}
 	}
 
-	timezone := os.Getenv("TZ")
+	enableGoroutine, _ := strconv.ParseBool(os.Getenv(constants.EnableLongPollingGoroutine))
+	if !enableGoroutine {
+		utils.AsyncToSync()
+	}
+
+	timezone := os.Getenv(constants.Timezone)
 	if timezone == "" {
 		timezone = "Asia/Jakarta"
 	}
@@ -64,7 +69,6 @@ func (m *LongPollingModules) RegisterCron() {
 	loc, _ := time.LoadLocation(timezone)
 	s := gocron.NewScheduler(loc)
 	s.Every(config.Configs.Main.System.LongPollingPeriodTime).Seconds().Do(func() {
-		// now := time.Now()
 		bodyResponse, err := m.Pkg.Telegram.GetUpdates(ctx, updateID, 100, 0, []string{})
 		if err != nil {
 			log.Println("[LongPolling - RegisterCron] Error getting updates, err:", err)
@@ -88,12 +92,12 @@ func (m *LongPollingModules) RegisterCron() {
 				nondialogflowProcessTime := float64(0)
 
 				userSessionID := cache.GetUserLatestSession(value.Message.From.ID)
-				if config.Configs.Main.System.IsUsingDialogflow {
-					if userSessionID == "" {
-						cache.SetUserRequest(value.Message.From.ID)
-						userSessionID = cache.GetUserLatestSession(value.Message.From.ID)
-					}
+				if userSessionID == "" {
+					cache.SetUserRequest(value.Message.From.ID)
+					userSessionID = cache.GetUserLatestSession(value.Message.From.ID)
+				}
 
+				if config.Configs.Main.System.IsUsingDialogflow {
 					dialogflowNow := time.Now()
 					indentResp, err := m.Pkg.Dialogflow.IndentDetectText(ctx, value.Message.Text, userSessionID)
 					if err != nil {
@@ -110,13 +114,11 @@ func (m *LongPollingModules) RegisterCron() {
 				} else {
 					nondialogflowNow := time.Now()
 					chatKey := constants.NotFoundKey
-					if userSessionID == "" {
-						if utils.InArray(value.Message.Text, constants.IntroductionChat[constants.HiIntroductionKey], true) {
-							cache.SetUserRequest(value.Message.From.ID)
-							chatKey = constants.HiIntroductionKey
-						}
-					} else {
-						cache.SetUserRequest(value.Message.From.ID)
+					if utils.InArray(value.Message.Text, constants.IntroductionChat[constants.HiIntroductionKey], true) {
+						chatKey = constants.HiIntroductionKey
+					}
+
+					if userSessionID != "" {
 						for key, v := range constants.MenusChat {
 							if utils.InArray(value.Message.Text, v, false) {
 								chatKey = key
