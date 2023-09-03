@@ -39,7 +39,7 @@ func (m *LongPollingModules) RegisterCron() {
 	ctx := context.Background()
 	updateID, _ := strconv.ParseInt(os.Getenv(constants.LongPollingLastUpdateID), 10, 64)
 	if updateID == 0 {
-		bodyResponse, err := m.Pkg.Telegram.GetUpdates(ctx, 0, 100, 0, []string{})
+		bodyResponse, err := m.Pkg.Telegram.GetUpdates(ctx, 0, 10, 0, []string{})
 		if err != nil {
 			log.Println("[LongPolling - RegisterCron] Error getting updates, err:", err)
 			return
