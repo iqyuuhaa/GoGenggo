@@ -83,12 +83,12 @@ func (m *LongPollingModules) RegisterCron() {
 			return
 		}
 
-		for key, value := range response.Result {
-			utils.AsyncFunc(func() {
-				if key == len(response.Result)-1 {
-					updateID = value.UpdateID + 1
-				}
+		if len(response.Result) != 0 {
+			updateID = response.Result[len(response.Result)-1].UpdateID + 1
+		}
 
+		for _, value := range response.Result {
+			utils.AsyncFunc(func() {
 				message := ""
 				dialogflowProcessTime := float64(0)
 				nondialogflowProcessTime := float64(0)
