@@ -88,54 +88,61 @@ func (m *LongPollingModules) RegisterCron() {
 		}
 
 		for _, value := range response.Result {
+			newResult := value
 			utils.AsyncFunc(func() {
 				message := ""
 				dialogflowProcessTime := float64(0)
 				nondialogflowProcessTime := float64(0)
 
-				userSessionID := cache.GetUserLatestSession(value.Message.From.ID)
-				if userSessionID == "" {
-					cache.SetUserRequest(value.Message.From.ID)
-					userSessionID = cache.GetUserLatestSession(value.Message.From.ID)
-				}
-
+				userSessionID := cache.GetUserLatestSession(newResult.Message.From.ID)
 				if config.Configs.Main.System.IsUsingDialogflow {
+					if userSessionID == "" {
+						cache.SetUserRequest(newResult.Message.From.ID)
+						userSessionID = cache.GetUserLatestSession(newResult.Message.From.ID)
+					}
+
 					dialogflowNow := time.Now()
-					indentResp, err := m.Pkg.Dialogflow.IndentDetectText(ctx, value.Message.Text, userSessionID)
+					indentResp, err := m.Pkg.Dialogflow.IndentDetectText(ctx, newResult.Message.Text, userSessionID)
 					if err != nil {
-						log.Printf("[LongPolling - RegisterCron] Error detect indent text with text: %s, err: %v", value.Message.Text, err)
+						log.Printf("[LongPolling - RegisterCron] Error detect indent text with text: %s, err: %v", newResult.Message.Text, err)
 						return
 					}
 					dialogflowProcessTime = time.Since(dialogflowNow).Seconds()
 
 					if indentResp.Intent.EndInteraction {
-						cache.DeleteUserRequest(value.Message.From.ID)
+						cache.DeleteUserRequest(newResult.Message.From.ID)
 					}
 
 					message = indentResp.GetFulfillmentText()
 				} else {
 					nondialogflowNow := time.Now()
 					chatKey := constants.NotFoundKey
-					if utils.InArray(value.Message.Text, constants.IntroductionChat[constants.HiIntroductionKey], true) {
+					if utils.InArray(newResult.Message.Text, constants.IntroductionChat[constants.HiIntroductionKey], true) {
 						chatKey = constants.HiIntroductionKey
 					}
 
 					if userSessionID != "" {
+						isInArray := false
 						for key, v := range constants.MenusChat {
-							if utils.InArray(value.Message.Text, v, false) {
+							if utils.InArray(newResult.Message.Text, v, false) {
 								chatKey = key
+								isInArray = true
 								break
 							}
 						}
 
-						if chatKey != constants.NotFoundKey {
-							cache.DeleteUserRequest(value.Message.From.ID)
+						if isInArray && chatKey != constants.NotFoundKey {
+							cache.DeleteUserRequest(newResult.Message.From.ID)
 						}
+					}
+
+					if chatKey == constants.HiIntroductionKey {
+						cache.SetUserRequest(newResult.Message.From.ID)
 					}
 
 					chatbotResponse, err := m.Platform.DB.ChatbotCommunication.GetResponse(ctx, chatKey)
 					if err != nil {
-						log.Printf("[LongPolling - RegisterCron] Error getting chatbot response with text: %s, err: %v", value.Message.Text, err)
+						log.Printf("[LongPolling - RegisterCron] Error getting chatbot response with text: %s, err: %v", newResult.Message.Text, err)
 						return
 					}
 					nondialogflowProcessTime = time.Since(nondialogflowNow).Seconds()
@@ -144,22 +151,22 @@ func (m *LongPollingModules) RegisterCron() {
 				}
 
 				replyMessage := utils.ReplaceStringsFormat(message, map[string]string{
-					"user_id":  fmt.Sprint(value.Message.From.ID),
-					"name":     value.Message.From.FirstName,
+					"user_id":  fmt.Sprint(newResult.Message.From.ID),
+					"name":     newResult.Message.From.FirstName,
 					"day_time": utils.GetCurrentDayTime(),
 				})
 
 				sendMessageNow := time.Now()
-				if err := m.Pkg.Telegram.SendMessage(ctx, value.Message.From.ID, replyMessage); err != nil {
-					log.Printf("[LongPolling - RegisterCron] Error sending message to %s, err: %v", value.Message.From.FirstName, err)
+				if err := m.Pkg.Telegram.SendMessage(ctx, newResult.Message.From.ID, replyMessage); err != nil {
+					log.Printf("[LongPolling - RegisterCron] Error sending message to %s, err: %v", newResult.Message.From.FirstName, err)
 					return
 				}
 				sendMessageProcessTime := time.Since(sendMessageNow).Seconds()
-				dateTime := time.Unix(value.Message.Date, 0)
+				dateTime := time.Unix(newResult.Message.Date, 0)
 
 				if err := m.Platform.DB.ChatbotHistory.InsertChatbotHistory(ctx, process.ChatbotHistoryProcess{
 					Method:                   method,
-					Identifier:               value.Message.From.FirstName,
+					Identifier:               newResult.Message.From.FirstName,
 					Datetime:                 dateTime,
 					ProcessTime:              time.Since(dateTime).Seconds(),
 					DialogflowProcessTime:    dialogflowProcessTime,

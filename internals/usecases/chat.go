@@ -48,16 +48,22 @@ func (usecase *UsecaseModules) WebhookDialogflowUsecase(ctx context.Context, pay
 		}
 
 		if userSessionID != "" {
+			isInArray := false
 			for key, v := range constants.MenusChat {
 				if utils.InArray(payload.Message.Text, v, false) {
 					chatKey = key
+					isInArray = true
 					break
 				}
 			}
 
-			if chatKey != constants.NotFoundKey {
+			if isInArray && chatKey != constants.NotFoundKey {
 				cache.DeleteUserRequest(payload.Message.From.ID)
 			}
+		}
+
+		if chatKey == constants.HiIntroductionKey {
+			cache.SetUserRequest(payload.Message.From.ID)
 		}
 
 		chatbotResponse, err := usecase.Platform.DB.ChatbotCommunication.GetResponse(ctx, chatKey)
