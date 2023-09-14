@@ -42,7 +42,7 @@ func LoadConfig() error {
 		return err
 	}
 
-	if !reflect.DeepEqual(Configs.Main, mainConfig) {
+	if Configs != nil && !reflect.DeepEqual(Configs.Main, mainConfig) {
 		log.Printf("Main config changed, values: %#v", mainConfig)
 	}
 
@@ -64,7 +64,7 @@ func LoadConfig() error {
 		return err
 	}
 
-	if !reflect.DeepEqual(Configs.DB, dbConfig) {
+	if Configs != nil && !reflect.DeepEqual(Configs.DB, dbConfig) {
 		log.Printf("DB config changed, values: %#v", dbConfig)
 	}
 
@@ -86,15 +86,17 @@ func LoadConfig() error {
 		return err
 	}
 
-	if !reflect.DeepEqual(Configs.Message, messageConfig) {
+	if Configs != nil && !reflect.DeepEqual(Configs.Message, messageConfig) {
 		log.Printf("Message config changed, values: %#v", messageConfig)
 	}
 
-	Configs = &Config{
+	cfg := &Config{
 		Main:    mainConfig,
 		DB:      dbConfig,
 		Message: messageConfig,
 	}
+
+	Configs = cfg
 
 	return nil
 }

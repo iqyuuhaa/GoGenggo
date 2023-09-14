@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"gogenggo/apps/server"
+	"gogenggo/config"
 	"gogenggo/internals"
 	"gogenggo/modules"
 	"gogenggo/modules/cache"
@@ -13,6 +14,8 @@ import (
 )
 
 func RunApps() {
+	config.LoadConfig()
+
 	runServers()
 }
 

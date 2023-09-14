@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"math/rand"
 
-	"gogenggo/config"
 	"gogenggo/internals/types/constants"
 
 	"github.com/google/uuid"
@@ -15,7 +14,7 @@ func GenerateUUID() string {
 }
 
 func GenerateRandomString() string {
-	s := make([]byte, config.Configs.Main.Generator.SaltLimit)
+	s := make([]byte, 4)
 	for i := range s {
 		s[i] = constants.LetterRunes[rand.Intn(len(constants.LetterRunes))]
 	}
@@ -30,7 +29,7 @@ func AddSaltingSuffix(s string) (str string) {
 }
 
 func RemoveSaltingSuffix(s string) (str string) {
-	str = s[:len(s)-config.Configs.Main.Generator.SaltLimit]
+	str = s[:len(s)-4]
 	return
 }
 
@@ -41,6 +40,6 @@ func AddSaltingPrefix(s string) (str string) {
 }
 
 func RemoveSaltingPrefix(s string) (str string) {
-	str = s[config.Configs.Main.Generator.SaltLimit:]
+	str = s[4:]
 	return
 }
