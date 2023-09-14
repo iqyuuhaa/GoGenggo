@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"reflect"
 
 	"gogenggo/internals/types/constants"
 
@@ -41,6 +42,10 @@ func LoadConfig() error {
 		return err
 	}
 
+	if !reflect.DeepEqual(Configs.Main, mainConfig) {
+		log.Printf("Main config changed, values: %#v", mainConfig)
+	}
+
 	dbConfig := DBConfig{}
 	var dbConfigFile any = fmt.Sprintf(constants.DBConfigFile, env)
 	if _, err := os.Stat(fmt.Sprintf(constants.DBConfigFile, env)); err != nil {
@@ -59,6 +64,10 @@ func LoadConfig() error {
 		return err
 	}
 
+	if !reflect.DeepEqual(Configs.DB, dbConfig) {
+		log.Printf("DB config changed, values: %#v", dbConfig)
+	}
+
 	messageConfig := MessageConfig{}
 	var messageConfigFile any = fmt.Sprintf(constants.MessageConfigFile, env)
 	if _, err := os.Stat(fmt.Sprintf(constants.MessageConfigFile, env)); err != nil {
@@ -75,6 +84,10 @@ func LoadConfig() error {
 	if err := ini.MapTo(&messageConfig, messageConfigFile); err != nil {
 		log.Fatal("[Config - LoadConfig] Error loading and mapping message config, err:", err)
 		return err
+	}
+
+	if !reflect.DeepEqual(Configs.Message, messageConfig) {
+		log.Printf("Message config changed, values: %#v", messageConfig)
 	}
 
 	Configs = &Config{

@@ -6,7 +6,6 @@ import (
 	"net/http"
 
 	"gogenggo/apps/server"
-	"gogenggo/config"
 	"gogenggo/internals"
 	"gogenggo/modules"
 	"gogenggo/modules/cache"
@@ -14,8 +13,6 @@ import (
 )
 
 func RunApps() {
-	config.LoadConfig()
-
 	runServers()
 }
 
@@ -42,14 +39,12 @@ func runServers() {
 	}
 	fmt.Println(">>> Finish initializing & populate server cache...")
 
-	if !config.Configs.Main.System.IsActiveWebhook {
-		fmt.Println(">>> Initializing long polling method...")
-		if err := longPolling.Init(internal.Pkg, internal.Platform); err != nil {
-			log.Fatalln("[Apps - RunApps] Error initializing long polling method, err:", err)
-			return
-		}
-		fmt.Println(">>> Finish long polling method...")
+	fmt.Println(">>> Initializing long polling method...")
+	if err := longPolling.Init(internal.Pkg, internal.Platform); err != nil {
+		log.Fatalln("[Apps - RunApps] Error initializing long polling method, err:", err)
+		return
 	}
+	fmt.Println(">>> Finish long polling method...")
 
 	fmt.Println(">>> Initializing server...")
 	srv, err := server.InitServer(internal.Usecase)
