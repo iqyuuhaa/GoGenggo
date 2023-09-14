@@ -15,9 +15,9 @@ import (
 var Configs *Config
 
 func LoadConfig() error {
-	if Configs != nil {
-		return nil
-	}
+	// if Configs != nil {
+	// 	return nil
+	// }
 
 	env := os.Getenv(constants.GolangChatbotEnvironment)
 	if env == "" {
